@@ -1,0 +1,44 @@
+header {
+    padding: 1rem;
+}
+
+.order-book-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    $headerColor: #888;
+
+    .order-table-container {
+        width: calc(50% - 2rem);
+        margin: 1rem 0;
+
+        .order-table {
+            width: 100%;
+            border-spacing: 0;
+            border: 1px solid $headerColor;
+            padding: 1rem;
+            
+            th,
+            td {
+                line-height: 2rem;
+                text-align: right;
+    
+                &:first-child {
+                    text-align: left;
+                }
+            }
+    
+            th {
+                border-bottom: 1px solid $headerColor;
+                font-weight: bold;
+                color: $headerColor;
+            }
+        }
+
+        p {
+            text-align: center;
+        }
+    }
+
+}
