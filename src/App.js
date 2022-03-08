@@ -14,10 +14,11 @@ function App() {
   useEffect(() => {
     fetchOrderBook().then(setNewOrderBook);
 
-    const socket = window.io(process.env.REACT_APP_SERVER_URL);
-    socket.on('OrderBookGenerated', data => {
-      setNewOrderBook(data);
-    });
+    const socket = new WebSocket(process.env.REACT_APP_WS_ROOT + '/depth');
+    socket.onmessage = function(event) {
+      const { data } = event;
+      setNewOrderBook(JSON.parse(data));
+    };
   }, [])
 
   return (
