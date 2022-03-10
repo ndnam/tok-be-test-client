@@ -1,29 +1,48 @@
-import {useEffect, useState} from 'react';
-import {fetchOrderBook} from './api.service';
+import { useEffect, useState } from 'react';
+import { fetchOrderBook } from './api.service';
 import './App.scss';
 
 function App() {
   const [lastUpdated, setLastUpdated] = useState(null);
-  const [orderBook, setOrderBook] = useState({bids: [], asks: []});
+  const [orderBook, setOrderBook] = useState({ bids: [], asks: [] });
 
-  const setNewOrderBook = (data) => {
+  const handleOrderBookData = (data) => {
     setOrderBook(data);
     setLastUpdated((new Date()).toString());
   };
 
   useEffect(() => {
-    fetchOrderBook().then(setNewOrderBook);
+    fetchOrderBook().then(handleOrderBookData);
 
-    const socket = new WebSocket(process.env.REACT_APP_WS_ROOT + '/depth');
-    socket.onmessage = function(event) {
-      const { data } = event;
-      setNewOrderBook(JSON.parse(data));
+    let socket;
+    const connectWebsocket = () => {
+      socket = new WebSocket(process.env.REACT_APP_WS_ROOT + '/depth');
+      socket.onmessage = function ({ data }) {
+        handleOrderBookData(JSON.parse(data));
+      };
+      socket.onclose = function (event) {
+        if (event.wasClean) {
+          console.log(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
+        } else {
+          console.log(`[close] Connection died, code=${event.code}`);
+          setTimeout(connectWebsocket, 5000); // retry connection
+        }
+      };
+      socket.onerror = function (error) {
+        console.log(`[error]`, error);
+      };
+    };
+    connectWebsocket();
+
+    return () => {
+      socket.close();
     };
   }, [])
 
   return (
     <div className="App">
       <header>
+        Simulation of ETHBTC market order book from Binance exchange. It is updated every 5 seconds. <br/>
         Last Updated At: {lastUpdated}
       </header>
       <div className="order-book-container">
